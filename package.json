@@ -1,0 +1,11 @@
+{
+  "name": "express-dir-router",
+  "version": "1.0.0",
+  "description": "Manage express routes by directory.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Zirui Wang",
+  "license": "MIT"
+}
