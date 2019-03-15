@@ -12,8 +12,5 @@
     "type": "git",
     "url": "https://github.com/zirui-wang/express-dir-router.git"
   },
-  "dependencies": {
-    "express": "^4.16.4",
-    "require-dir": "^1.2.0"
-  }
+  "dependencies": {}
 }
