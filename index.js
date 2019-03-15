@@ -1,74 +1,71 @@
 'use strict';
 
-const router = require('express').Router();
 const path = require('path');
-const requireDir = require('require-dir');
-
-function flattenObject(obj) {
-  const toReturn = {};
-
-  for (let i in obj) {
-    if (!obj.hasOwnProperty(i)) continue;
-
-    if (typeof obj[i] == 'object') {
-      const flatObject = flattenObject(obj[i]);
-      for (let x in flatObject) {
-        if (!flatObject.hasOwnProperty(x)) continue;
-
-        toReturn[i + '/' + x] = flatObject[x];
-      }
-    } else {
-      toReturn[i] = obj[i];
-    }
-  }
-  return toReturn;
-}
+const fs = require('fs');
 
 function getBaseUrl(prefix, name) {
   const index = name.lastIndexOf('/');
   if (index === -1) return prefix;
-  return prefix + '/' + name.substring(0, index);
+  return prefix + name.substring(0, index);
 }
 
-function dispatch(baseUrl, route) {
+function dispatch(app, baseUrl, route) {
   const { method, url, handler } = route;
   const curUrl = baseUrl + url;
 
   switch (method.toLowerCase()) {
     case 'get':
-      router.get(curUrl, handler);
+      app.get(curUrl, handler);
       break;
     case 'post':
-      router.post(curUrl, handler);
+      app.post(curUrl, handler);
       break;
     case 'put':
-      router.put(curUrl, handler);
+      app.put(curUrl, handler);
       break;
     case 'delete':
-      router.delete(curUrl, handler);
+      app.delete(curUrl, handler);
       break;
     case 'patch':
-      router.patch(curUrl, handler);
+      app.patch(curUrl, handler);
     default:
       break;
   }
 }
 
-module.exports = config => {
-  const { app = {}, root = '', prefix = '' } = config;
+function loadRoutes(rootPath, filter) {
+  const routes = {};
+  loadRoutesHelper(rootPath, '');
 
-  const dir = flattenObject(
-    requireDir(path.resolve(root, 'routes'), {
-      recurse: true,
-      filter: function(fullPath) {
-        return !fullPath.endsWith('index.js');
+  function loadRoutesHelper(dirPath, key) {
+    fs.readdirSync(dirPath).forEach(file => {
+      const filePath = path.resolve(dirPath, file);
+      const stat = fs.statSync(filePath);
+      const curKey = key + '/' + file;
+      if (stat.isDirectory()) {
+        loadRoutesHelper(filePath, curKey);
+      } else if (filter && filter instanceof Function && filter(file)) {
+        routes[
+          curKey
+            .split('.')
+            .slice(0, -1)
+            .join('.')
+        ] = require(filePath);
       }
-    })
-  );
-
-  for (let name in dir) {
-    dispatch(getBaseUrl(prefix, name), dir[name](app));
+    });
   }
 
-  return router;
+  return routes;
+}
+
+module.exports = (app, root, opt) => {
+  opt = opt || {};
+  const { prefix = '', filter } = opt;
+
+  const routes = loadRoutes(path.resolve(root, 'routes'), filter);
+  console.log(routes);
+
+  for (let name in routes) {
+    dispatch(app, getBaseUrl(prefix, name), routes[name](app));
+  }
 };
