@@ -1,6 +1,6 @@
 {
   "name": "express-dir-router",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Manage express routes by directory.",
   "main": "index.js",
   "scripts": {

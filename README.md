@@ -54,6 +54,10 @@ module.exports = app => {
 };
 ```
 
+## Examples
+
+To see `routing` and `testing` working under `express-dir-router`, please see [examples]('./examples').
+
 ## License
 
 MIT
