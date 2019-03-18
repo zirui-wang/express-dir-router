@@ -44,7 +44,8 @@ function loadRoutes(rootPath, filter) {
       const curKey = key + '/' + file;
       if (stat.isDirectory()) {
         loadRoutesHelper(filePath, curKey);
-      } else if (filter && filter instanceof Function && filter(file)) {
+      } else {
+        if (filter && filter instanceof Function && !filter(file)) return;
         routes[
           curKey
             .split('.')
